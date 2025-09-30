@@ -6,19 +6,38 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private int maxHP = 100;
     [SerializeField] private int currentHP;
 
+    [Header("Visual Feedback")]
+    [SerializeField] private HitFlashEffect hitFlashEffect;
+
     private void Start()
     {
         currentHP = maxHP;
         Debug.Log($"Player Health initialized: {currentHP}/{maxHP} HP");
+
+        // Auto-find HitFlashEffect if not assigned
+        if (hitFlashEffect == null)
+        {
+            hitFlashEffect = GetComponent<HitFlashEffect>();
+            if (hitFlashEffect == null)
+            {
+                Debug.LogWarning("PlayerHealth: No HitFlashEffect found. Visual feedback will not work.");
+            }
+        }
     }
 
     public void TakeDamage(int damage)
     {
         currentHP -= damage;
         currentHP = Mathf.Max(0, currentHP); // Ensure HP doesn't go below 0
-        
+
         Debug.Log($"Player took {damage} damage! Current HP: {currentHP}/{maxHP}");
-        
+
+        // Trigger visual feedback
+        if (hitFlashEffect != null)
+        {
+            hitFlashEffect.Flash();
+        }
+
         if (currentHP <= 0)
         {
             Die();

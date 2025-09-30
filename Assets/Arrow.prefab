@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4948725459118151591}
   m_Layer: 0
   m_Name: Arrow
-  m_TagString: Untagged
+  m_TagString: Arrow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 5825026982739939156}
   serializedVersion: 2
   m_LocalRotation: {x: 0.23940378, y: -0.17524028, z: -0.6626466, w: 0.68766}
-  m_LocalPosition: {x: -5.6, y: 1.52, z: 0.95}
+  m_LocalPosition: {x: -4.86, y: 1.15, z: 1.05}
   m_LocalScale: {x: 0.3, y: 0.7, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -137,11 +137,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &4948725459118151591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,6 +154,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf57675f9b7bd4d66b24c5d5195d7e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Arrow
-  speed: 10
+  speed: 20
   damage: 10
   lifetime: 5

@@ -87,6 +87,7 @@ public class StructureTrigger : MonoBehaviour
             if (arrowScript != null)
             {
                 arrowScript.SetDirection(arrowDirection);
+                arrowScript.SetSpawner(gameObject); // Tell arrow who spawned it
             }
             else
             {
