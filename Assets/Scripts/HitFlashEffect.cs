@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class HitFlashEffect : MonoBehaviour
 {
@@ -11,10 +12,11 @@ public class HitFlashEffect : MonoBehaviour
     private Renderer[] renderers;
     private MaterialPropertyBlock propertyBlock;
     private Coroutine flashCoroutine;
+    private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
 
-    // Shader property IDs for better performance
-    private static readonly int FlashColorID = Shader.PropertyToID("_FlashColor");
-    private static readonly int FlashAmountID = Shader.PropertyToID("_FlashAmount");
+    // Shader property IDs for URP (works with Universal Render Pipeline)
+    private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
+    private static readonly int ColorID = Shader.PropertyToID("_Color");
 
     private void Awake()
     {
@@ -25,6 +27,19 @@ public class HitFlashEffect : MonoBehaviour
         if (renderers.Length == 0)
         {
             Debug.LogWarning($"HitFlashEffect on {gameObject.name}: No renderers found!");
+        }
+
+        // Store original colors
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer != null && renderer.sharedMaterial != null)
+            {
+                // Try to get base color (URP uses _BaseColor, Built-in uses _Color)
+                Color originalColor = renderer.sharedMaterial.HasProperty(BaseColorID)
+                    ? renderer.sharedMaterial.GetColor(BaseColorID)
+                    : renderer.sharedMaterial.GetColor(ColorID);
+                originalColors[renderer] = originalColor;
+            }
         }
     }
 
@@ -66,11 +81,23 @@ public class HitFlashEffect : MonoBehaviour
             // Apply to all renderers
             foreach (Renderer renderer in renderers)
             {
-                if (renderer != null)
+                if (renderer != null && originalColors.ContainsKey(renderer))
                 {
+                    // Blend between original color and flash color
+                    Color blendedColor = Color.Lerp(originalColors[renderer], flashColor, flashAmount);
+
                     renderer.GetPropertyBlock(propertyBlock);
-                    propertyBlock.SetColor(FlashColorID, flashColor);
-                    propertyBlock.SetFloat(FlashAmountID, flashAmount);
+
+                    // Set color for both URP and Built-in render pipeline
+                    if (renderer.sharedMaterial.HasProperty(BaseColorID))
+                    {
+                        propertyBlock.SetColor(BaseColorID, blendedColor);
+                    }
+                    if (renderer.sharedMaterial.HasProperty(ColorID))
+                    {
+                        propertyBlock.SetColor(ColorID, blendedColor);
+                    }
+
                     renderer.SetPropertyBlock(propertyBlock);
                 }
             }
@@ -78,13 +105,22 @@ public class HitFlashEffect : MonoBehaviour
             yield return null;
         }
 
-        // Ensure flash is completely off
+        // Restore original colors
         foreach (Renderer renderer in renderers)
         {
-            if (renderer != null)
+            if (renderer != null && originalColors.ContainsKey(renderer))
             {
                 renderer.GetPropertyBlock(propertyBlock);
-                propertyBlock.SetFloat(FlashAmountID, 0f);
+
+                if (renderer.sharedMaterial.HasProperty(BaseColorID))
+                {
+                    propertyBlock.SetColor(BaseColorID, originalColors[renderer]);
+                }
+                if (renderer.sharedMaterial.HasProperty(ColorID))
+                {
+                    propertyBlock.SetColor(ColorID, originalColors[renderer]);
+                }
+
                 renderer.SetPropertyBlock(propertyBlock);
             }
         }
